@@ -2,6 +2,23 @@
 
 Bidirectional converter between **Ubisoft Connect (.save)** and **CODEX (.sav)** save formats for **Far Cry 5** (GameId 1803).
 
+## Problem
+
+Far Cry 5 uses **encrypted save files** tied to a specific user profile ID. If you download a save from the internet or get one from a friend:
+
+- **Ubisoft Connect** saves are encrypted with an account-derived key — another Uplay account can't read them.
+- **CODEX (cracked)** saves use a different encryption key derived from the emulated profile ID. The crack wraps them in a custom `.sav` container (`CDX\0` header).
+
+Attempting to use saves from one setup with the other produces either a **"Granite" error** (save decryption failure) or simply **shows "New Game"** with no "Continue" — the game silently rejects the save because the profile doesn't match.
+
+The transfer is further complicated because:
+
+- Both formats embed the user's **profile identifier** in the file header, which must match the running game's identity.
+- The encrypted body is **AES-256-CBC** with a key derived from that profile ID — you can't just hex-edit the header and call it done.
+- Existing conversion tools for FC5 saves are **non-existent or incomplete** — no dedicated utility handles this format bridge.
+
+This tool solves the **format mismatch** by stripping the foreign wrapper and repackaging the encrypted save body in the correct container. In u2c mode, the CODEX emulator's built-in save converter (`ConverterEnabled=1`) then handles the actual key re-derivation the first time you launch the game.
+
 ## Modes
 
 ### u2c (default) — Uplay → CODEX
